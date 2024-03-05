@@ -25,10 +25,10 @@ const App = () => {
     try {
       const apiKey = import.meta.env.VITE_omdbapikey;
       const movieResponse = await axios.get(
-        `http://www.omdbapi.com/?apikey=${apiKey}&s=${searchTerm}&type=movie`
+        `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTerm}&type=movie`
       );
       const seriesResponse = await axios.get(
-        `http://www.omdbapi.com/?apikey=${apiKey}&s=${searchTerm}&type=series`
+        `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTerm}&type=series`
       );
 
       const isMovieResponseValid = movieResponse.data.Response === "True";
@@ -41,7 +41,21 @@ const App = () => {
       } else {
         setMovieSuggestions([]);
         setSeriesSuggestions([]);
-        setShowSuggestions(false); // Hide suggestions when there is no response
+        setShowSuggestions(true); // Show suggestions when there is no response
+
+        let movieErrorMessage = "";
+        let seriesErrorMessage = "";
+
+        if (!isMovieResponseValid) {
+          movieErrorMessage = movieResponse.data.Error;
+        }
+
+        if (!isSeriesResponseValid) {
+          seriesErrorMessage = seriesResponse.data.Error;
+        }
+
+        setMovieSuggestions([{ Title: movieErrorMessage }]);
+        setSeriesSuggestions([{ Title: seriesErrorMessage }]);
       }
     } catch (error) {
       console.error(error);
@@ -58,7 +72,10 @@ const App = () => {
 
     words.forEach((word) => {
       const regex = new RegExp(word, "gi");
-      highlightedTitle = highlightedTitle.replace(regex, `<strong>${word}</strong>`);
+      highlightedTitle = highlightedTitle.replace(
+        regex,
+        `<strong>${word}</strong>`
+      );
     });
 
     return highlightedTitle;
@@ -74,7 +91,10 @@ const App = () => {
         onChange={handleChange}
       />
       {showSuggestions && (
-        <div id="suggestions" className="px-2 py-2 border-t text-sm text-gray-800">
+        <div
+          id="suggestions"
+          className="px-2 py-2 border-t text-sm text-gray-800"
+        >
           <div className="mb-3">
             <h3 className="text-xs text-gray-600 pl-2 py-1">Movies</h3>
             <ul>
@@ -84,7 +104,7 @@ const App = () => {
                     href="#"
                     className="block hover:bg-gray-200 rounded px-2 py-1"
                     dangerouslySetInnerHTML={{
-                      __html: highlightMatchedWords(movie.Title)
+                      __html: highlightMatchedWords(movie.Title),
                     }}
                   />
                 </li>
@@ -98,7 +118,7 @@ const App = () => {
                     href="#"
                     className="block hover:bg-gray-200 rounded px-2 py-1"
                     dangerouslySetInnerHTML={{
-                      __html: highlightMatchedWords(series.Title)
+                      __html: highlightMatchedWords(series.Title),
                     }}
                   />
                 </li>
