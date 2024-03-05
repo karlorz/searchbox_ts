@@ -24,6 +24,8 @@ const App = () => {
   const fetchSuggestions = async () => {
     try {
       const apiKey = import.meta.env.VITE_omdbapikey;
+      // const apiKey = process.env.VITE_omdbapikey;
+      // console.log(process.env.VITE_omdbapikey);
       const movieResponse = await axios.get(
         `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTerm}&type=movie`
       );
