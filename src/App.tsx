@@ -1,10 +1,26 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+type Movie = {
+  Title: string;
+  Year: string;
+  imdbID: string;
+  Type: string;
+  Poster: string;
+};
+
+type Series = {
+  Title: string;
+  Year: string;
+  imdbID: string;
+  Type: string;
+  Poster: string;
+};
+
 const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [movieSuggestions, setMovieSuggestions] = useState([]);
-  const [seriesSuggestions, setSeriesSuggestions] = useState([]);
+  const [movieSuggestions, setMovieSuggestions] = useState<Movie[]>([]);
+  const [seriesSuggestions, setSeriesSuggestions] = useState<Series[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false); // New state for controlling visibility of suggestions
 
   useEffect(() => {
@@ -22,64 +38,72 @@ const App = () => {
   }, [searchTerm]);
 
   const fetchSuggestions = async () => {
-    try {
-      const apiKey = import.meta.env.VITE_omdbapikey;
-      // const apiKey = process.env.VITE_omdbapikey;
-      // console.log(process.env.VITE_omdbapikey);
-      const movieResponse = await axios.get(
-        `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTerm}*&type=movie`
-      );
-      const seriesResponse = await axios.get(
-        `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTerm}*&type=series`
-      );
+  try {
+    const apiKey = import.meta.env.VITE_omdbapikey;
+    // const apiKey = process.env.VITE_omdbapikey;
+    // console.log(process.env.VITE_omdbapikey);
+    const searchTermWithWildcards = searchTerm.replace(/\s+/g, "*");
+    const movieResponse = await axios.get(
+      `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTermWithWildcards}*&type=movie`
+    );
+    const seriesResponse = await axios.get(
+      `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTermWithWildcards}*&type=series`
+    );
 
-      const isMovieResponseValid = movieResponse.data.Response === "True";
-      const isSeriesResponseValid = seriesResponse.data.Response === "True";
+    const isMovieResponseValid = movieResponse.data.Response === "True";
+    const isSeriesResponseValid = seriesResponse.data.Response === "True";
 
-      if (isMovieResponseValid && isSeriesResponseValid) {
-        setMovieSuggestions(movieResponse.data.Search.slice(0, 3));
-        setSeriesSuggestions(seriesResponse.data.Search.slice(0, 3));
-        setShowSuggestions(true); // Show suggestions when there is a response
-      } else {
-        setMovieSuggestions([]);
-        setSeriesSuggestions([]);
-        setShowSuggestions(true); // Show suggestions when there is no response
+    if (isMovieResponseValid && isSeriesResponseValid) {
+      setMovieSuggestions(movieResponse.data.Search.slice(0, 3));
+      setSeriesSuggestions(seriesResponse.data.Search.slice(0, 3));
+      setShowSuggestions(true); // Show suggestions when there is a response
+    } else {
+      setMovieSuggestions([]);
+      setSeriesSuggestions([]);
+      setShowSuggestions(true);
 
-        let movieErrorMessage = "";
-        let seriesErrorMessage = "";
+      const movieErrorMessage = {
+        Title: "",
+        Year: "",
+        imdbID: "",
+        Type: "",
+        Poster: ""
+      };
+      const seriesErrorMessage = {
+        Title: "",
+        Year: "",
+        imdbID: "",
+        Type: "",
+        Poster: ""
+      };
 
-        if (!isMovieResponseValid) {
-          movieErrorMessage = movieResponse.data.Error;
-        }
-
-        if (!isSeriesResponseValid) {
-          seriesErrorMessage = seriesResponse.data.Error;
-        }
-
-        setMovieSuggestions([{ Title: movieErrorMessage }]);
-        setSeriesSuggestions([{ Title: seriesErrorMessage }]);
+      if (!isMovieResponseValid) {
+        movieErrorMessage.Title = movieResponse.data.Error;
       }
-    } catch (error) {
-      console.error(error);
+
+      if (!isSeriesResponseValid) {
+        seriesErrorMessage.Title = seriesResponse.data.Error;
+      }
+
+      setMovieSuggestions([movieErrorMessage]);
+      setSeriesSuggestions([seriesErrorMessage]);
     }
-  };
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
   const highlightMatchedWords = (title: string) => {
-    const words = searchTerm.split(" ");
-    let highlightedTitle = title;
-
-    words.forEach((word) => {
-      const regex = new RegExp(word, "gi");
-      highlightedTitle = highlightedTitle.replace(
-        regex,
-        `<strong>${word}</strong>`
-      );
-    });
-
+    const regex = new RegExp(`(${searchTerm})`, "gi");
+    const highlightedTitle = title.replace(
+      regex,
+      `<strong>$1</strong>`
+    );
+  
     return highlightedTitle;
   };
 
@@ -100,7 +124,7 @@ const App = () => {
           <div className="mb-3">
             <h3 className="text-xs text-gray-600 pl-2 py-1">Movies</h3>
             <ul>
-              {movieSuggestions.map((movie: any) => (
+              {movieSuggestions.map((movie) => (
                 <li key={movie.imdbID}>
                   <a
                     href="#"
@@ -114,7 +138,7 @@ const App = () => {
             </ul>
             <h3 className="text-xs text-gray-600 pl-2 py-1">TV Shows</h3>
             <ul>
-              {seriesSuggestions.map((series: any) => (
+              {seriesSuggestions.map((series) => (
                 <li key={series.imdbID}>
                   <a
                     href="#"
