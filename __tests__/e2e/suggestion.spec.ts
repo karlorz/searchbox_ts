@@ -21,15 +21,15 @@ test("Empty search term", async ({ page }) => {
   expect(await page.isVisible("#suggestions")).toBe(false);
 });
 
-test('Search with short query', async ({ page }) => {
-  await page.goto('/');
+test("Search with short query", async ({ page }) => {
+  await page.goto("/");
 
   // Submit a search term with less than three characters
-  const searchBox = await page.waitForSelector('#searchbox');
-  await searchBox.type('ab');
+  const searchBox = await page.waitForSelector("#searchbox");
+  await searchBox.type("ab");
 
   // Verify that no suggestions are displayed
-  expect(await page.isVisible('#suggestions')).toBe(false);
+  expect(await page.isVisible("#suggestions")).toBe(false);
 });
 
 test("Movie suggestions", async ({ page }) => {
@@ -44,7 +44,8 @@ test("Movie suggestions", async ({ page }) => {
 
   // Verify that movie suggestions are displayed
   const movieSuggestions = await page.$$(
-    '#suggestions h3:text("Movies") + ul li');
+    '#suggestions h3:text("Movies") + ul li'
+  );
   expect(movieSuggestions.length).toBeGreaterThan(0);
 
   // Verify that the suggestions contain the search term
