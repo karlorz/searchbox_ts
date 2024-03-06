@@ -27,10 +27,10 @@ const App = () => {
       // const apiKey = process.env.VITE_omdbapikey;
       // console.log(process.env.VITE_omdbapikey);
       const movieResponse = await axios.get(
-        `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTerm}&type=movie`
+        `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTerm}*&type=movie`
       );
       const seriesResponse = await axios.get(
-        `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTerm}&type=series`
+        `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTerm}*&type=series`
       );
 
       const isMovieResponseValid = movieResponse.data.Response === "True";
