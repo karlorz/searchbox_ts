@@ -38,61 +38,61 @@ const App = () => {
   }, [searchTerm]);
 
   const fetchSuggestions = async () => {
-  try {
-    // const apiKey = import.meta.env.VITE_omdbapikey;
-    // const apiKey = process.env.VITE_omdbapikey;
-    // console.log(process.env.VITE_omdbapikey);
-    const apiKey = "2b25973a";
-    const searchTermWithWildcards = searchTerm.replace(/\s+/g, "*");
-    const movieResponse = await axios.get(
-      `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTermWithWildcards}*&type=movie`
-    );
-    const seriesResponse = await axios.get(
-      `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTermWithWildcards}*&type=series`
-    );
+    try {
+      // const apiKey = import.meta.env.VITE_omdbapikey;
+      // const apiKey = process.env.VITE_omdbapikey;
+      // console.log(process.env.VITE_omdbapikey);
+      const apiKey = "2b25973a";
+      const searchTermWithWildcards = searchTerm.replace(/\s+/g, "*");
+      const movieResponse = await axios.get(
+        `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTermWithWildcards}*&type=movie`
+      );
+      const seriesResponse = await axios.get(
+        `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchTermWithWildcards}*&type=series`
+      );
 
-    const isMovieResponseValid = movieResponse.data.Response === "True";
-    const isSeriesResponseValid = seriesResponse.data.Response === "True";
+      const isMovieResponseValid = movieResponse.data.Response === "True";
+      const isSeriesResponseValid = seriesResponse.data.Response === "True";
 
-    if (isMovieResponseValid && isSeriesResponseValid) {
-      setMovieSuggestions(movieResponse.data.Search.slice(0, 3));
-      setSeriesSuggestions(seriesResponse.data.Search.slice(0, 3));
-      setShowSuggestions(true); // Show suggestions when there is a response
-    } else {
-      setMovieSuggestions([]);
-      setSeriesSuggestions([]);
-      setShowSuggestions(true);
+      if (isMovieResponseValid && isSeriesResponseValid) {
+        setMovieSuggestions(movieResponse.data.Search.slice(0, 3));
+        setSeriesSuggestions(seriesResponse.data.Search.slice(0, 3));
+        setShowSuggestions(true); // Show suggestions when there is a response
+      } else {
+        setMovieSuggestions([]);
+        setSeriesSuggestions([]);
+        setShowSuggestions(true);
 
-      const movieErrorMessage = {
-        Title: "",
-        Year: "",
-        imdbID: "",
-        Type: "",
-        Poster: ""
-      };
-      const seriesErrorMessage = {
-        Title: "",
-        Year: "",
-        imdbID: "",
-        Type: "",
-        Poster: ""
-      };
+        const movieErrorMessage = {
+          Title: "",
+          Year: "",
+          imdbID: "",
+          Type: "",
+          Poster: "",
+        };
+        const seriesErrorMessage = {
+          Title: "",
+          Year: "",
+          imdbID: "",
+          Type: "",
+          Poster: "",
+        };
 
-      if (!isMovieResponseValid) {
-        movieErrorMessage.Title = movieResponse.data.Error;
+        if (!isMovieResponseValid) {
+          movieErrorMessage.Title = movieResponse.data.Error;
+        }
+
+        if (!isSeriesResponseValid) {
+          seriesErrorMessage.Title = seriesResponse.data.Error;
+        }
+
+        setMovieSuggestions([movieErrorMessage]);
+        setSeriesSuggestions([seriesErrorMessage]);
       }
-
-      if (!isSeriesResponseValid) {
-        seriesErrorMessage.Title = seriesResponse.data.Error;
-      }
-
-      setMovieSuggestions([movieErrorMessage]);
-      setSeriesSuggestions([seriesErrorMessage]);
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    console.error(error);
-  }
-};
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -100,11 +100,8 @@ const App = () => {
 
   const highlightMatchedWords = (title: string) => {
     const regex = new RegExp(`(${searchTerm})`, "gi");
-    const highlightedTitle = title.replace(
-      regex,
-      `<strong>$1</strong>`
-    );
-  
+    const highlightedTitle = title.replace(regex, `<strong>$1</strong>`);
+
     return highlightedTitle;
   };
 
